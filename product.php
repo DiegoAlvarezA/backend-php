@@ -4,6 +4,7 @@ include "utils.php";
 
 $dbConn =  connect($db);
 
+// Make a purchase
 if(isset($_REQUEST['action'])){
 	
   if($_REQUEST['action']=='purchase'){
