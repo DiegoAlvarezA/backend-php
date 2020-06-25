@@ -4,11 +4,31 @@ include "utils.php";
 
 $dbConn =  connect($db);
 
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Methods: HEAD, GET, POST, PUT, PATCH, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method,Access-Control-Request-Headers, Authorization");
+header('Content-Type: application/json');
+$method = $_SERVER['REQUEST_METHOD'];
+if ($method == "OPTIONS") {
+  header('Access-Control-Allow-Origin: *');
+  header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization");
+  header("HTTP/1.1 200 OK");
+  die();
+}
+
 if(isset($_REQUEST['action'])){
 	
   if($_REQUEST['action']=='purchase'){
     if (isset($_REQUEST['id']) && isset($_REQUEST['quantity']))
     {
+      if(!is_numeric($_REQUEST['quantity'])){
+        header("HTTP/1.1 400 OK");
+        echo json_encode(array(
+          'status' => false,
+          'message' => 'Cantidad no es un número'
+        ));
+        exit();
+      }
       $sql = $dbConn->prepare("SELECT * FROM products where id=:id");
       $sql->bindValue(':id', $_REQUEST['id']);
       $sql->execute();
@@ -106,8 +126,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE')
   $statement = $dbConn->prepare("DELETE FROM products where id=:id");
   $statement->bindValue(':id', $id);
   $statement->execute();
+  // Allow for all origins and credentials. Also allow GET, POST, PATCH, and OPTIONS request verbs
   header("HTTP/1.1 200 OK");
-  echo json_encode('Producto eliminado');
+  echo json_encode(array(
+    'status' => True,
+    'message' => "Producto eliminado"
+  ));
 	exit();
 }
 
